@@ -12,3 +12,14 @@ With the ability of AI to generate code, let Python execute the non -existent wa
 3. Final effect
 * You can execute methods that don't exist, so be careful to name the methods properly.
 * Methods that work can be saved to avoid duplicate generation
+
+# Quickly start
+pip install ai-executor==0.2.6 #安装库
+
+示例代码：
+from ai_executor import AI
+
+# 用例
+ai1 = AI("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")
+ai1.a_add_b(3, 4)
+ai1.a的b次幂(3, 4)
