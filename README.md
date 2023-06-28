@@ -15,7 +15,7 @@ With the ability of AI to generate code, let Python execute the non -existent wa
 
 # Quickly start
 ```
-pip install ai-executor==0.2.6 #安装库
+pip install ai-executor #安装库
 ```
 
 示例代码：
