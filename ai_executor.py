@@ -2,8 +2,9 @@ import openai
 import os
 import json
 
+
 class AI:
-    def __init__(self, chatgpt_api_key, mode='gpt', cache=True):
+    def __init__(self, chatgpt_api_key='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', mode='gpt', cache=True):
         self.chatgpt_api_key = chatgpt_api_key
         self.mode = mode
         self.generated_code_cache = {}
@@ -19,9 +20,9 @@ class AI:
             if method_name in self.generated_code_cache:
                 generated_code = self.generated_code_cache[method_name]
                 print("代码从缓存中获取")
-                
+
             else:
-                generated_code = self.call_chatgpt(method_name, *args, **kwargs)
+                generated_code = self.__call_chatgpt(method_name, *args, **kwargs)
                 print("首次生成的代码")
 
             print('#################code#################')
@@ -31,7 +32,7 @@ class AI:
             try:
                 exec(generated_code, globals())
                 result = eval(f"{method_name}(*args, **kwargs)")
-                print('函数输出：',result,'\n\n')
+                print('函数输出：', result, '\n\n')
                 if self.cache:
                     if method_name not in self.generated_code_cache:
                         self.generated_code_cache[method_name] = generated_code
@@ -41,11 +42,34 @@ class AI:
             except Exception as e:
                 print(f"生成或执行代码时出错: {e}")
                 return None
-            
 
         return method
 
-    def call_chatgpt(self, method_name, *args, **kwargs):
+    def list_cached_methods(self):
+        with open(self.cache_file, 'r') as f:
+            data = json.load(f)
+        print(list(data.keys()))
+
+    def check_cached_method(self, key='a的b次幂'):
+        with open(self.cache_file, 'r') as f:
+            data = json.load(f)
+        if key in data:
+            print(f'方法<{key}>存在')
+        else:
+            print(f'方法<{key}>不存在')
+
+    def delete_cached_method(self, key='a的b次幂'):
+        with open(self.cache_file, 'r') as f:
+            data = json.load(f)
+        if key in data:
+            del data[key]
+            print(f'方法<{key}>删除成功')
+        else:
+            print(f'方法<{key}>不存在')
+        with open(self.cache_file, 'w') as f:
+            json.dump(data, f)
+
+    def __call_chatgpt(self, method_name, *args, **kwargs):
         prompt = f"你是一个乐于助人的python专家，擅长编写各种python函数。\
         请帮我编写一个Python函数，函数命名为<{method_name}>，\
         你不可以对函数名做任何改动！传入的参数示例为：*{args}。\
@@ -65,7 +89,8 @@ class AI:
                 stop=None,
                 temperature=0.5,
             )
-            return response.choices[0].text.replace('。','').replace('！','').replace('```python','').replace('```','').strip()
+            return response.choices[0].text.replace('。', '').replace('！', '').replace('```python', '').replace('```',
+                                                                                                               '').strip()
 
         if self.mode == 'gpt':
             try:
@@ -75,21 +100,26 @@ class AI:
                     temperature=0
                 )
                 assistant_response = response.choices[0].message['content']
-                return assistant_response.replace('```python','').replace('```','').strip()
+                return assistant_response.replace('```python', '').replace('```', '').strip()
             except Exception as e:
                 print(f"生成或执行代码时出错: {e}")
                 response = openai.Completion.create(
-                engine="text-davinci-003",
-                prompt=prompt,
-                max_tokens=150,
-                n=1,
-                stop=None,
-                temperature=0.5,
+                    engine="text-davinci-003",
+                    prompt=prompt,
+                    max_tokens=150,
+                    n=1,
+                    stop=None,
+                    temperature=0.5,
                 )
-                return response.choices[0].text.replace('。','').replace('！','').replace('```python','').replace('```','').strip()
+                return response.choices[0].text.replace('。', '').replace('！', '').replace('```python', '').replace(
+                    '```', '').strip()
+
 
 if __name__ == '__main__':
-    # 测试用例
-    ai = AI("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")
-    ai.plot绘制柱状图([2,3])
-    ai.plot绘制柱状图([2,3,7])
+    # 测试用例 "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"
+    ai = AI()
+    ai.list_cached_methods()
+    ai.check_cached_method('s')
+    ai.列表元素累积([1, 2, 3])
+    ai.delete_cached_method('列表元素累积')
+    ai.list_cached_methods()
